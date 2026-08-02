@@ -1,7 +1,9 @@
 
 name: auto-run-test-many-configs-script-on-testrunner
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "master" ]
 
 jobs:
   manyConfigsLegacyTest:

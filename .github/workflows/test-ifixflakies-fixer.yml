@@ -1,7 +1,9 @@
 
 name: auto-run-test-ifixflakies-fixer
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "master" ]
 
 jobs:
   fixerTest1:

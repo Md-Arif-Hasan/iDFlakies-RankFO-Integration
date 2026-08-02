@@ -1,7 +1,9 @@
 
 name: auto-run-test-many-projects-script-on-maven-plugin
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "master" ]
 
 jobs:
   manyProjMavenPluginTest1:

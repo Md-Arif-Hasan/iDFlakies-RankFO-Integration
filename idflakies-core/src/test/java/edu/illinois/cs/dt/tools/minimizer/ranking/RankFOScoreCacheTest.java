@@ -154,8 +154,35 @@ public class RankFOScoreCacheTest {
 
         Path cacheDir = tmpDir.resolve("rankfo-scores");
         assertTrue("rankfo-scores/ directory should be created", Files.isDirectory(cacheDir));
-        long fileCount = Files.list(cacheDir).count();
-        assertEquals("Exactly one cache file should exist", 1, fileCount);
+    }
+
+    // Every heuristic gets its own subdirectory, so a directory listing of rankfo-scores/
+    // (e.g. by a human or a validation script) can tell heuristics apart without opening
+    // any file -- this is what closes the "which heuristic produced this?" gap.
+    @Test
+    public void save_nestsCacheFileUnderHeuristicSubdirectory() throws IOException {
+        RankFOScoreCache.save(tmpDir, "com.example.V#test",
+                HeuristicType.DISTANCE, OdType.VICTIM_POLLUTER,
+                singleCandidate("com.example.A#test", 1.0));
+
+        Path heuristicDir = tmpDir.resolve("rankfo-scores").resolve("DISTANCE");
+        assertTrue("rankfo-scores/DISTANCE/ subdirectory should exist", Files.isDirectory(heuristicDir));
+        long fileCount = Files.list(heuristicDir).count();
+        assertEquals("Exactly one cache file should exist under the heuristic subdirectory", 1, fileCount);
+    }
+
+    @Test
+    public void differentHeuristics_writeToDifferentSubdirectories() throws IOException {
+        RankFOScoreCache.save(tmpDir, "com.example.V#test",
+                HeuristicType.PLUS_ONE, OdType.VICTIM_POLLUTER,
+                singleCandidate("com.example.A#test", 1.0));
+        RankFOScoreCache.save(tmpDir, "com.example.V#test",
+                HeuristicType.METHODS, OdType.VICTIM_POLLUTER,
+                singleCandidate("com.example.A#test", 1.0));
+
+        Path cacheDir = tmpDir.resolve("rankfo-scores");
+        assertTrue(Files.isDirectory(cacheDir.resolve("PLUS_ONE")));
+        assertTrue(Files.isDirectory(cacheDir.resolve("METHODS")));
     }
 
     // ── helpers ───────────────────────────────────────────────────────────

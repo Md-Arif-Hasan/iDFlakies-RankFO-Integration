@@ -77,7 +77,12 @@ public class TestMinimizer extends FileCache<MinimizeTestsResult> {
         // reordering happens per-call in run() where the disk cache keeps it cheap.
         this.testOrder = prefix;
 
-        this.path = PathManager.minimizedPath(dependentTest, MD5.hashOrder(expectedRun.testOrder()), expected);
+        // Nest one subdirectory per strategy (minimized/<STRATEGY>/...) so results from
+        // different -Ddt.minimizer.strategy runs never collide on the same path and a
+        // directory listing alone identifies which strategy produced a given result.
+        String strategyLabel = STRATEGY != null ? STRATEGY.name() : "BASELINE";
+        this.path = PathManager.minimizedPath(
+                strategyLabel + "/" + dependentTest, MD5.hashOrder(expectedRun.testOrder()), expected);
     }
 
     public Result expected() {

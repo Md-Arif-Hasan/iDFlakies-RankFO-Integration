@@ -15,7 +15,7 @@ public class RankFOScorer {
     private final int maxOrders;
 
     public RankFOScorer(HeuristicType heuristicType) {
-        this(heuristicType, 20);
+        this(heuristicType, RankFOCandidateReorderer.MAX_ORDERS);
     }
 
     public RankFOScorer(HeuristicType heuristicType, int maxOrders) {
@@ -46,6 +46,8 @@ public class RankFOScorer {
             nonPolluterScore.put(c, 0.0);
         }
 
+    // Forms candidate union across up to LIMIT (e.g., 20) randomized orderings - nested for
+
         for (int i = 0; i < limit; i++) {
             TestOrderRecord rec = orderings.get(i);
             Result victimResult = rec.getResult(targetTest);
@@ -60,20 +62,20 @@ public class RankFOScorer {
                 String c = subOrder.get(idx);
                 if (!currentRank.containsKey(c)) continue;
                 int dist = count - idx;
+
+                // the actual math happens. Each heuristic returns a different number
                 double delta = heuristic.scoreDelta(relevant, count, dist);
                 currentRank.put(c, currentRank.get(c) + delta);
             }
 
-            if (i > 0) {
-                for (String c : candidates) {
-                    double curr = currentRank.get(c);
-                    double prev = previousRank.getOrDefault(c, 0.0);
-                    double diff = Math.abs(curr - prev);
-                    if (curr > prev) {
-                        polluterScore.put(c, polluterScore.get(c) + diff);
-                    } else if (curr < prev) {
-                        nonPolluterScore.put(c, nonPolluterScore.get(c) + diff);
-                    }
+            for (String c : candidates) {
+                double curr = currentRank.get(c);
+                double prev = previousRank.getOrDefault(c, 0.0);
+                double diff = Math.abs(curr - prev);
+                if (curr > prev) {
+                    polluterScore.put(c, polluterScore.get(c) + diff);
+                } else if (curr < prev) {
+                    nonPolluterScore.put(c, nonPolluterScore.get(c) + diff);
                 }
             }
         }

@@ -36,9 +36,12 @@ public class RankFOScorerTest {
         List<ScoredCandidate> ranked = scorer.score(V, Arrays.asList(ord0, ord1, ord2),
             OdType.VICTIM_POLLUTER);
 
+        // P is before V in ord0 and ord1 (both relevant/failing), so it gets a METHODS
+        // delta of +1/1 on each of those two orders: +1.0 from ord0 (diffed against the
+        // zero baseline) and +1.0 from ord1 (diffed against ord0's rank) = 2.0 total.
         assertEquals(2, ranked.size());
         assertEquals(P, ranked.get(0).getTestName());
-        assertEquals(1.0, ranked.get(0).getPolluterScore(), DELTA);
+        assertEquals(2.0, ranked.get(0).getPolluterScore(), DELTA);
         assertEquals(0.0, ranked.get(0).getNonPolluterScore(), DELTA);
         assertEquals(N, ranked.get(1).getTestName());
         assertEquals(0.0, ranked.get(1).getPolluterScore(), DELTA);
@@ -59,12 +62,17 @@ public class RankFOScorerTest {
     }
 
     @Test
-    public void single_ordering_produces_zero_class_scores() {
+    public void single_relevant_ordering_still_produces_a_signal() {
+        // Only one ordering total, and the candidate appears before a FAILING victim.
+        // The Python reference (getRankedLists/generateClassScoreVP in getCombinations.py)
+        // seeds an explicit order "-1" baseline of zeros and diffs every real order
+        // (including order 0) against its predecessor. So a single relevant ordering
+        // must already contribute a nonzero polluterScore -- it is not "no signal yet".
         TestOrderRecord ord = order(Arrays.asList(P, V), P, "PASS", V, "FAILURE");
         RankFOScorer scorer = new RankFOScorer(HeuristicType.PLUS_ONE);
         List<ScoredCandidate> result = scorer.score(V, Arrays.asList(ord), OdType.VICTIM_POLLUTER);
         assertEquals(1, result.size());
-        assertEquals(0.0, result.get(0).getPolluterScore(), DELTA);
+        assertEquals(1.0, result.get(0).getPolluterScore(), DELTA);
         assertEquals(0.0, result.get(0).getNonPolluterScore(), DELTA);
     }
 
@@ -77,15 +85,17 @@ public class RankFOScorerTest {
         List<ScoredCandidate> result = scorer.score(V, Arrays.asList(ord0, ord1),
             OdType.BRITTLE_STATESETTER);
 
+        // Both orderings are relevant (BSS: brittle V passes); P is before V in each,
+        // contributing +1.0 from ord0 (vs. zero baseline) and +1.0 from ord1 = 2.0 total.
         assertEquals(1, result.size());
         assertEquals(P, result.get(0).getTestName());
-        assertEquals(1.0, result.get(0).getPolluterScore(), DELTA);
+        assertEquals(2.0, result.get(0).getPolluterScore(), DELTA);
     }
 
     @Test
     public void loader_parses_real_dtfixingtools_without_throwing() throws Exception {
         Path dtDir = Paths.get(
-            "/media/iit/01DAF7B03B5CE760/UIUC++/SummerProject/iDFlakies/http-request/lib/.dtfixingtools"
+            "/media/iit/01DAF7B03B5CE760/UIUC++/testProjects/http-request/lib/.dtfixingtools"
         );
         Assume.assumeTrue(
             "Skip: run mvn idflakies:detect on http-request/ first",
@@ -106,7 +116,9 @@ public class RankFOScorerTest {
         );
         RankFOScorer scorer = new RankFOScorer(HeuristicType.PLUS_ONE, 2);
         List<ScoredCandidate> result = scorer.score(V, orderings, OdType.VICTIM_POLLUTER);
-        assertEquals(1.0, result.get(0).getPolluterScore(), DELTA);
+        // Only the first 2 of the 5 orderings are processed (cap=2): +1.0 from order 0
+        // (vs. zero baseline) and +1.0 from order 1 = 2.0, regardless of orders 2-4.
+        assertEquals(2.0, result.get(0).getPolluterScore(), DELTA);
     }
 
     // ── Combined (+1, D) ──────────────────────────────────────────────────
@@ -155,8 +167,10 @@ public class RankFOScorerTest {
         List<ScoredCandidate> result = scorer.score(V, Arrays.asList(ord0, ord1),
             OdType.VICTIM_POLLUTER);
 
+        // P is before V in both relevant orderings: +1.0 from ord0 (vs. zero baseline)
+        // and +1.0 from ord1 = 2.0 total.
         assertEquals(1, result.size());
         assertEquals(P, result.get(0).getTestName());
-        assertEquals(1.0, result.get(0).getPolluterScore(), DELTA);
+        assertEquals(2.0, result.get(0).getPolluterScore(), DELTA);
     }
 }

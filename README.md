@@ -23,10 +23,10 @@ mvn install -DskipTests -q
 
 ### End-to-end validation
 
-Runs `idflakies:minimize` on a minimal built-in project with a known polluter/victim pair and verifies the correct polluter is identified:
+Runs `idflakies:minimize` on a minimal built-in project with a known polluter/victim pair, for all 5 RankFO heuristics, and verifies both the identified polluter and the individual candidate scores in `rankfo-scores/*.json` against independently-computed expected values:
 
 ```bash
-bash scripts/validate-rankfo.sh
+bash scripts/rankfo-validation/validate-rankfo.sh
 ```
 
 Expected output: `VALIDATION PASSED`

@@ -27,4 +27,4 @@ jobs:
           restore-keys: ${{ runner.os }}-maven-
 
       - name: Run RankFO end-to-end validation
-        run: bash scripts/validate-rankfo.sh
+        run: bash scripts/rankfo-validation/validate-rankfo.sh

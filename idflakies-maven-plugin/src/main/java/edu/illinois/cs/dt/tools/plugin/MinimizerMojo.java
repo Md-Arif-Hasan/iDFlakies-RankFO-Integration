@@ -212,8 +212,12 @@ public class MinimizerMojo extends AbstractIDFlakiesMojo {
     public Stream<MinimizeTestsResult> runDependentTestFile(final Path dtFile, MavenProject project) {
         return fromDtList(dtFile, project).flatMap(minimizer -> {
             try {
+                // minimizer.get() (TestMinimizer extends FileCache) already persists the result
+                // via TestMinimizer.save(), using the strategy-aware path. A second, separate
+                // MinimizeTestsResult.save() call here was redundant and used its own,
+                // strategy-unaware path computation -- writing a stale duplicate copy under
+                // the old flat minimized/ layout. Removed; get() already saved it correctly.
                 final MinimizeTestsResult result = minimizer.get();
-                result.save();
                 return Stream.of(result);
             } catch (Exception e) {
                 e.printStackTrace();

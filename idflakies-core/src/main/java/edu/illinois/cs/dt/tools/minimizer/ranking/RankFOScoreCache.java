@@ -26,6 +26,8 @@ class RankFOScoreCache {
         try {
             FileTime cacheTime   = Files.getLastModifiedTime(cacheFile);
             FileTime resultsTime = Files.getLastModifiedTime(resultsDir);
+            
+            //This is the stale-cache check.
             if (resultsTime.compareTo(cacheTime) > 0) return null;
 
             String json = new String(Files.readAllBytes(cacheFile));
@@ -51,13 +53,16 @@ class RankFOScoreCache {
         }
     }
 
+    // Nested one subdirectory per heuristic (rankfo-scores/<HEURISTIC>/...) so a directory
+    // listing alone identifies which heuristic a file belongs to -- no need to open the file
+    // or parse its name.
     static Path cacheFile(Path dtDir, String targetTest,
                            HeuristicType heuristic, OdType odType) {
         String safeName = targetTest.replace('#', '_')
                 + "-" + heuristic.name()
                 + "-" + odType.name()
                 + ".json";
-        return dtDir.resolve(SUBDIR).resolve(safeName);
+        return dtDir.resolve(SUBDIR).resolve(heuristic.name()).resolve(safeName);
     }
 
     static Path resultsDir(Path dtDir) {

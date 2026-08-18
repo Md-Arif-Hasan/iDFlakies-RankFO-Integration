@@ -7,7 +7,8 @@ public interface RankingHeuristic {
      *
      * @param orderIsRelevant  true = increase rank (VP: victim failed; BSS: brittle passed)
      * @param testsBeforeTarget count of tests strictly before the target in this ordering
-     * @param distanceToTarget  count of tests strictly between candidate and target
+     * @param distanceToTarget  index distance from candidate to target (1 = immediately
+     *                          adjacent), not a count of tests strictly between them
      */
     double scoreDelta(boolean orderIsRelevant, int testsBeforeTarget, int distanceToTarget);
 

@@ -1,9 +1,7 @@
 
 name: auto-run-test-many-projects-script-on-testrunner
 
-on:
-  push:
-    branches: [ "master" ]
+on: [push, pull_request]
 
 jobs:
   manyProjLegacyTest1:

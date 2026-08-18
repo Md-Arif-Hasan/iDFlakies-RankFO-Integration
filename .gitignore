@@ -12,3 +12,5 @@ target/
 **/.dtfixingtools/
 http-request/
 CODE_EXPLANATION.md
+__pycache__/
+*.pyc

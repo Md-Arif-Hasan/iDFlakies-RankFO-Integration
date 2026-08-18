@@ -8,16 +8,19 @@ SUBJECT_DIR="$IDFLAKIES_DIR/validation-subject"
 
 STRATEGIES=(RANKFO_PLUS_ONE RANKFO_METHODS RANKFO_DISTANCE_D RANKFO_COMBINED_P1_D RANKFO_COMBINED_M_D)
 
-echo "=== [1/4] Building iDFlakies ==="
-mvn -f "$IDFLAKIES_DIR/pom.xml" install -DskipTests -q
+echo "=== [1/5] Verifying verify_scores.py itself against hand-computed toy inputs ==="
+python3 "$SCRIPT_DIR/test_verify_scores.py"
 
-echo "=== [2/4] Compiling validation-subject ==="
+echo "=== [2/5] Building iDFlakies (running idflakies-core unit tests) ==="
+mvn -f "$IDFLAKIES_DIR/pom.xml" install -q
+
+echo "=== [3/5] Compiling validation-subject ==="
 mvn -f "$SUBJECT_DIR/pom.xml" test-compile -q
 
-echo "=== [3/4] Generating fixtures (4 tests, 10 sampled orders) ==="
+echo "=== [4/5] Generating fixtures (4 tests, 10 sampled orders) ==="
 bash "$SCRIPT_DIR/generate-fixtures.sh"
 
-echo "=== [4/4] Running minimize + verifying scores for all ${#STRATEGIES[@]} heuristics ==="
+echo "=== [5/5] Running minimize + verifying scores for all ${#STRATEGIES[@]} heuristics ==="
 FAIL=0
 for STRATEGY in "${STRATEGIES[@]}"; do
   echo "--- $STRATEGY ---"

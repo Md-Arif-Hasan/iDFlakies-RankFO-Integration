@@ -11,7 +11,15 @@ public final class ScoredCandidate {
         this.nonPolluterScore = nonPolluterScore;
     }
 
-    public String getTestName()        { return testName; }
-    public double getPolluterScore()   { return polluterScore; }
-    public double getNonPolluterScore(){ return nonPolluterScore; }
+    public String getTestName() {
+        return testName;
+    }
+
+    public double getPolluterScore() {
+        return polluterScore;
+    }
+
+    public double getNonPolluterScore() {
+        return nonPolluterScore;
+    }
 }

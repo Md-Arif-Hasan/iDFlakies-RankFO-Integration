@@ -31,11 +31,14 @@ public class RankFOScorer {
 
         int limit = Math.min(maxOrders, orderings.size());
 
+        // Forms the candidate union across up to `limit` (<= maxOrders) randomized orderings.
         Set<String> candidates = new LinkedHashSet<>();
         for (int i = 0; i < limit; i++) {
             candidates.addAll(orderings.get(i).testsBeforeTarget(targetTest));
         }
-        if (candidates.isEmpty()) return Collections.emptyList();
+        if (candidates.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         Map<String, Double> currentRank    = new HashMap<>();
         Map<String, Double> polluterScore  = new HashMap<>();
@@ -46,12 +49,12 @@ public class RankFOScorer {
             nonPolluterScore.put(c, 0.0);
         }
 
-    // Forms candidate union across up to LIMIT (e.g., 20) randomized orderings - nested for
-
         for (int i = 0; i < limit; i++) {
             TestOrderRecord rec = orderings.get(i);
             Result victimResult = rec.getResult(targetTest);
-            if (victimResult == null || victimResult == Result.SKIPPED) continue;
+            if (victimResult == null || victimResult == Result.SKIPPED) {
+                continue;
+            }
 
             Map<String, Double> previousRank = new HashMap<>(currentRank);
 
@@ -60,7 +63,9 @@ public class RankFOScorer {
             int count = subOrder.size();
             for (int idx = 0; idx < count; idx++) {
                 String c = subOrder.get(idx);
-                if (!currentRank.containsKey(c)) continue;
+                if (!currentRank.containsKey(c)) {
+                    continue;
+                }
                 int dist = count - idx;
 
                 // the actual math happens. Each heuristic returns a different number
@@ -92,7 +97,9 @@ public class RankFOScorer {
                 int cmp = Double.compare(
                     b.getPolluterScore() - b.getNonPolluterScore(),
                     a.getPolluterScore() - a.getNonPolluterScore());
-                if (cmp != 0) return cmp;
+                if (cmp != 0) {
+                    return cmp;
+                }
                 return Integer.compare(
                     lastDist.getOrDefault(a.getTestName(), Integer.MAX_VALUE),
                     lastDist.getOrDefault(b.getTestName(), Integer.MAX_VALUE));
@@ -127,11 +134,16 @@ public class RankFOScorer {
 
     private boolean isRelevant(TestOrderRecord rec, String targetTest, OdType odType) {
         Result r = rec.getResult(targetTest);
-        if (r == null) return false;
+        if (r == null) {
+            return false;
+        }
         switch (odType) {
-            case VICTIM_POLLUTER:     return r == Result.FAILURE || r == Result.ERROR;
-            case BRITTLE_STATESETTER: return r == Result.PASS;
-            default: return false;
+            case VICTIM_POLLUTER:
+                return r == Result.FAILURE || r == Result.ERROR;
+            case BRITTLE_STATESETTER:
+                return r == Result.PASS;
+            default:
+                return false;
         }
     }
 }

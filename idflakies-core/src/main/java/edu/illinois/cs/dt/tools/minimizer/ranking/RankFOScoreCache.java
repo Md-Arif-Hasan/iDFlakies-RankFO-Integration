@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
 
-// Invalidated when test-runs/results/ mtime advances past the cache file.
+/** Invalidated when test-runs/results/ mtime advances past the cache file. */
 class RankFOScoreCache {
 
     private static final Gson GSON = new GsonBuilder().create();
@@ -20,19 +20,27 @@ class RankFOScoreCache {
         Path cacheFile = cacheFile(dtDir, targetTest, heuristic, odType);
         Path resultsDir = resultsDir(dtDir);
 
-        if (!Files.exists(cacheFile)) return null;
-        if (!Files.exists(resultsDir)) return null;
+        if (!Files.exists(cacheFile)) {
+            return null;
+        }
+        if (!Files.exists(resultsDir)) {
+            return null;
+        }
 
         try {
             FileTime cacheTime   = Files.getLastModifiedTime(cacheFile);
             FileTime resultsTime = Files.getLastModifiedTime(resultsDir);
-            
-            //This is the stale-cache check.
-            if (resultsTime.compareTo(cacheTime) > 0) return null;
+
+            // This is the stale-cache check.
+            if (resultsTime.compareTo(cacheTime) > 0) {
+                return null;
+            }
 
             String json = new String(Files.readAllBytes(cacheFile));
             CacheEntry entry = GSON.fromJson(json, CacheEntry.class);
-            if (entry == null || entry.candidates == null) return null;
+            if (entry == null || entry.candidates == null) {
+                return null;
+            }
             return entry.candidates;
         } catch (Exception e) {
             return null;
@@ -53,9 +61,11 @@ class RankFOScoreCache {
         }
     }
 
-    // Nested one subdirectory per heuristic (rankfo-scores/<HEURISTIC>/...) so a directory
-    // listing alone identifies which heuristic a file belongs to -- no need to open the file
-    // or parse its name.
+    /**
+     * Nested one subdirectory per heuristic (rankfo-scores/&lt;HEURISTIC&gt;/...) so a
+     * directory listing alone identifies which heuristic a file belongs to -- no need to
+     * open the file or parse its name.
+     */
     static Path cacheFile(Path dtDir, String targetTest,
                            HeuristicType heuristic, OdType odType) {
         String safeName = targetTest.replace('#', '_')

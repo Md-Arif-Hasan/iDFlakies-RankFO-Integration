@@ -21,10 +21,10 @@ public class RankFOCandidateReorderer {
             String targetTest,
             Result isolationResult,
             HeuristicType heuristic) {
-        return core(prefix, targetTest, isolationResult, PathManager.cachePath(), heuristic);
+        return scoreAndReorder(prefix, targetTest, isolationResult, PathManager.cachePath(), heuristic);
     }
 
-    // Package-private: used by unit tests to inject a temp directory.
+    /** Package-private: used by unit tests to inject a temp directory. */
     static List<String> reorder(
             List<String> prefix,
             String targetTest,
@@ -33,7 +33,7 @@ public class RankFOCandidateReorderer {
         String heuristicName = Configuration.config()
                 .getProperty("dt.rankfo.heuristic", "DISTANCE");
         try {
-            return core(prefix, targetTest, isolationResult, dtDir,
+            return scoreAndReorder(prefix, targetTest, isolationResult, dtDir,
                     HeuristicType.valueOf(heuristicName));
         } catch (IllegalArgumentException e) {
             Logger.getGlobal().log(Level.FINE,
@@ -43,7 +43,7 @@ public class RankFOCandidateReorderer {
         }
     }
 
-    private static List<String> core(
+    private static List<String> scoreAndReorder(
             List<String> prefix,
             String targetTest,
             Result isolationResult,

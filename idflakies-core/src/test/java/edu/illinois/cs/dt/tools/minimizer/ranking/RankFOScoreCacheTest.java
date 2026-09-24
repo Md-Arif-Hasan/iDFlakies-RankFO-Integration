@@ -196,7 +196,9 @@ public class RankFOScoreCacheTest {
     }
 
     private static void deleteRecursive(Path dir) throws IOException {
-        if (!Files.exists(dir)) return;
+        if (!Files.exists(dir)) {
+            return;
+        }
         Files.walk(dir)
              .sorted(Comparator.reverseOrder())
              .forEach(p -> { try { Files.delete(p); } catch (IOException ignored) {} });

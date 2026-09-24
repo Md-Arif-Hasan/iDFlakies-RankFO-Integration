@@ -222,12 +222,16 @@ public class RankFOCandidateReordererTest {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"testOrder\":[");
         for (int i = 0; i < order.size(); i++) {
-            if (i > 0) sb.append(",");
+            if (i > 0) {
+                sb.append(",");
+            }
             sb.append("\"").append(order.get(i)).append("\"");
         }
         sb.append("],\"results\":{");
         for (int i = 0; i < resultPairs.length; i += 2) {
-            if (i > 0) sb.append(",");
+            if (i > 0) {
+                sb.append(",");
+            }
             sb.append("\"").append(resultPairs[i]).append("\":{\"result\":\"")
               .append(resultPairs[i + 1]).append("\"}");
         }

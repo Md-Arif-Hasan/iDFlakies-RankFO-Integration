@@ -63,8 +63,7 @@ public class TestMinimizer extends FileCache<MinimizeTestsResult> {
         this.fullTestOrder = testOrder;
         this.dependentTest = dependentTest;
         this.runner = runner;
-
-        final List<String> prefix = testOrder.contains(dependentTest)
+        this.testOrder = testOrder.contains(dependentTest)
                 ? ListUtil.before(testOrder, dependentTest) : testOrder;
 
         debug("Getting expected result for: " + dependentTest);
@@ -73,11 +72,12 @@ public class TestMinimizer extends FileCache<MinimizeTestsResult> {
         this.isolationResult = result(Collections.singletonList(dependentTest));
         debug("Expected: " + expected);
 
-        // result(order) guard in getPolluters() requires the original prefix; RankFO
-        // reordering happens per-call in run() where the disk cache keeps it cheap.
-        this.testOrder = prefix;
-
-        this.path = PathManager.minimizedPath(dependentTest, MD5.hashOrder(expectedRun.testOrder()), expected);
+        // Nest one subdirectory per strategy (minimized/<STRATEGY>/...) so results from
+        // different -Ddt.minimizer.strategy runs never collide on the same path and a
+        // directory listing alone identifies which strategy produced a given result.
+        String strategyLabel = STRATEGY != null ? STRATEGY.name() : "BASELINE";
+        this.path = PathManager.minimizedPath(
+                strategyLabel + "/" + dependentTest, MD5.hashOrder(expectedRun.testOrder()), expected);
     }
 
     public Result expected() {
@@ -196,7 +196,7 @@ public class TestMinimizer extends FileCache<MinimizeTestsResult> {
         return index;
     }
 
-    // Returns a list where each element is test from order and the dependent test
+    /** Returns a list where each element is test from order and the dependent test. */
     private List<List<String>> getSingleTests(final List<String> order, String dependentTest) {
         List<List<String>> singleTests = new ArrayList<>();
         for (String test : order) {
@@ -229,11 +229,9 @@ public class TestMinimizer extends FileCache<MinimizeTestsResult> {
         }
 
         // Original iFixFlakies behavior: delta debugging with binary half-split.
-        final List<String> deps = new ArrayList<>();
         TestMinimizerDeltaDebugger debugger =
             new TestMinimizerDeltaDebugger(this.runner, this.dependentTest, this.expected);
-        deps.addAll(debugger.deltaDebug(order, 2));
-        return deps;
+        return new ArrayList<>(debugger.deltaDebug(order, 2));
     }
 
     public String getDependentTest() {

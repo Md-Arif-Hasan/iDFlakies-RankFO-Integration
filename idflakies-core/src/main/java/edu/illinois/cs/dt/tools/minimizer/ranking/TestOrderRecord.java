@@ -19,7 +19,9 @@ public final class TestOrderRecord {
     /** Returns tests appearing strictly before targetTest. Empty if targetTest not in order. */
     public List<String> testsBeforeTarget(String targetTest) {
         int idx = testOrder.indexOf(targetTest);
-        if (idx < 0) return Collections.emptyList();
+        if (idx < 0) {
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableList(testOrder.subList(0, idx));
     }
 
@@ -28,6 +30,7 @@ public final class TestOrderRecord {
         return testResults.get(testName);
     }
 
+    /** The full test order this record was captured from, including the target test. */
     public List<String> getTestOrder() {
         return testOrder;
     }
